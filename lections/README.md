@@ -7,7 +7,7 @@
 | Занятие | Запись |
 | --- | --- |
 | Лекция 1: Из чего состоит ежедневная работа инженера | [Ссылка](https://avito.ktalk.ru/recordings/nW7I3tli2VKvCnlhm2uR) |
-| Лекция 2: LLM и промт инжениринг. Введение в агенты | |
+| Лекция 2: LLM и промт инжениринг. Введение в агенты | [Ссылка](https://avito.ktalk.ru/recordings/CkhzAIHktUuQ33NQfDUy) |
 | Лекция 3: Локальные модели | |
 | Лекция 4: Кодинг агенты. Управление контекстом | |
 | Лекция 5: Spec-driven разработка с AI-агентами | |
@@ -21,7 +21,7 @@
 
 | Занятие | M3200 | M3201 | M3202 | M3203 | M3204 |
 | --- | --- | --- | --- | --- | --- |
-| Практика 1. Проект: знакомим с техническими бизнес-контекстами | | | | | |
+| Практика 1. Проект: знакомим с техническими бизнес-контекстами |[Ссылка](https://avito.ktalk.ru/recordings/BhfuSd9Ul2N97QaI5qmW) |[Ссылка](https://avito.ktalk.ru/recordings/RUUCJsvyG0ExhgVDJnnT) |[Ссылка](https://avito.ktalk.ru/recordings/9LkxXkep0waOw72mx9Em)|[Cсылка](https://avito.ktalk.ru/recordings/dFiBoeC0tYXXOw1X2dbE)|[Ссылка](https://avito.ktalk.ru/recordings/aiZOTHeLfapVGQ5LZAqh)|
 | Практика 2. Дорабатываем артефакты для программирования логики | | | | | |
 | Практика 3. Создание проекта. Реализация первой фичи | | | | | |
 | Практика 4. MCP и скиллы | | | | | |
