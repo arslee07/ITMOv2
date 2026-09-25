@@ -12,10 +12,6 @@
 | RAG | [`rag/experiment.md`](rag/experiment.md) | practices/practice_01/adr.md | Фиксация политики логирования OBS-1 (запрет логирования diff и ответов) на основе точных ссылок на CASE.md | Ручная сверка цитат с правилами OUT-1 и OBS-1 в CASE.md | Неподтверждённые предложения по внешним системам мониторинга (ELK, Prometheus) |
 | Tree of Thoughts | [`tree_of_thoughts/experiment.md`](tree_of_thoughts/experiment.md) | practices/practice_01/adr.md | Сравнение 3 стратегий санитизации секретов (ML vs Regex vs DLP) и фиксация выбора Regex-first в ADR | Бенчмарк времени санитизации diff 20k символов (<5 мс) | ML-сканер секретов и внешние DLP API |
 | ReAct | [`react/experiment.md`](react/experiment.md) | practices/practice_01/prompts.md | Лимит 5 шагов и немедленная остановка при 3 рисках | Лог шагов агента в react/experiment.md | Поиск дополнительных замечаний сверх лимита |
-| Chain of Verification | [`chain_of_verification/experiment.md`](chain_of_verification/experiment.md) |  |  |  |  |
-| Tree of Thoughts | [`tree_of_thoughts/experiment.md`](tree_of_thoughts/experiment.md) |  |  |  |  |
-| RAG | [`rag/experiment.md`](rag/experiment.md) |  |  |  |  |
-| ReAct | [`react/experiment.md`](react/experiment.md) |  |  |  |  |
 
 ## Независимое ревью
 
