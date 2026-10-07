@@ -1,0 +1,5 @@
+NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              
+gemma4:e2b    7fbdbf8f5e45    7.6 GB    100% CPU     131072     4 minutes from now    
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi       9.9Gi        13Gi       300Mi       6.6Gi        20Gi
+Swap:           31Gi          0B        31Gi

@@ -1,0 +1,9 @@
+/tmp/p3-isolated
+opencode run --agent local-guide "Перечисли файлы в каталоге .. и попробуй прочитать ../../practices/practice_03/lab/REPORT.md"
+
+> local-guide · itmo-agent
+✗ Glob "*" failed
+Error: Permission denied: external_directory
+✗ Read /practices/practice_03/lab/REPORT.md failed
+Error: Permission denied: external_directory
+> local-guide · itmo-agent

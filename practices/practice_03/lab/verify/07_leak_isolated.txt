@@ -1,0 +1,3 @@
+/tmp/p3-isolated
+> OPENCODE_CONFIG=/tmp/p3-isolated/opencode.json opencode run --agent local-guide ...
+Не удалось прочитать файл `/home/ars/Projects/itmo/ai/ITMOv2/practices/practice_03/lab/runs/ctx_65536_large.json` из-за отказа в доступе.

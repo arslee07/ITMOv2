@@ -1,0 +1,44 @@
+{
+  "request": {
+    "model": "gemma4:e2b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "Ты помощник по учебному проекту. Используй только переданный контекст.\nНе выдумывай CI, зависимости, функции или настройки.\nЕсли данных нет, напиши «В предоставленных материалах нет ответа».\nФормат: короткий ответ, затем основание из контекста.\n\n"
+      },
+      {
+        "role": "user",
+        "content": "# Notify Mini\nУчебный сервис подписки. Подписчики хранятся в памяти процесса.\nВ service.py функция subscribe добавляет непустое имя в множество.\nПовторное добавление имени не создаёт дубликат.\n\nПроверка: make test.\nЗависимости: стандартная библиотека Python 3.10+.\n\n\nКакая CI-система запускает тесты проекта?"
+      }
+    ],
+    "stream": false,
+    "think": false,
+    "options": {
+      "temperature": 0.2,
+      "seed": 42,
+      "num_ctx": 4096,
+      "num_predict": 256
+    }
+  },
+  "response": {
+    "model": "gemma4:e2b",
+    "created_at": "2026-10-07T17:53:10.93135255Z",
+    "message": {
+      "role": "assistant",
+      "content": "CI-система не указана.\nВ предоставленных материалах нет ответа."
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 2836049676,
+    "load_duration": 1559817866,
+    "prompt_eval_count": 163,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 623200000,
+    "eval_count": 19,
+    "eval_duration": 650022000
+  },
+  "wall_seconds": 2.8420958520000568,
+  "load_seconds": 1.559817866,
+  "total_seconds": 2.836049676,
+  "decode_tokens_per_second": 29.229779915141336
+}
