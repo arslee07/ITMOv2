@@ -12,20 +12,26 @@ def main():
     p.add_argument("--temperature", type=float, default=0.2)
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--output", required=True)
+    p.add_argument("--num-ctx", type=int, default=4096)
+    p.add_argument("--num-predict", type=int, default=512)
+    p.add_argument("--context-file", default="demo/README.md")
     args = p.parse_args()
     root = Path(__file__).resolve().parent
-    context = (root / "demo/README.md").read_text()
+    ctx_path = Path(args.context_file)
+    if not ctx_path.is_absolute():
+        ctx_path = root / ctx_path
+    context = ctx_path.read_text()
     messages = []
     if args.mode == "system":
         messages.append({"role": "system", "content": (root / "system.txt").read_text()})
     messages.append({"role": "user", "content": context + "\nКакая CI-система запускает тесты проекта?"})
     payload = {"model": args.model, "messages": messages, "stream": False, "think": False,
-               "options": {"temperature": args.temperature, "seed": args.seed, "num_ctx": 4096, "num_predict": 512}}
+               "options": {"temperature": args.temperature, "seed": args.seed, "num_ctx": args.num_ctx, "num_predict": args.num_predict}}
     request = urllib.request.Request("http://localhost:11434/api/chat",
         data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"})
     started = time.perf_counter()
     try:
-        with urllib.request.urlopen(request, timeout=300) as response:
+        with urllib.request.urlopen(request, timeout=900) as response:
             answer = json.load(response)
     except Exception as exc:
         raise SystemExit("Local Ollama request failed: " + str(exc))
@@ -41,4 +47,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
