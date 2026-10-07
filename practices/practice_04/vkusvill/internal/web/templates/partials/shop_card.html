@@ -1,0 +1,99 @@
+{{ define "shop_card.html" }}
+<div class="shop-card group bg-white rounded-xl p-4 border border-slate-200 hover:border-emerald-500 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-all duration-200 cursor-pointer relative"
+     id="shop-item-{{ .ID }}"
+     data-shop-id="{{ .ID }}"
+     data-lat="{{ .Lat }}"
+     data-lon="{{ .Lon }}"
+     onclick="window.focusShop({{ .ID }}, {{ .Lat }}, {{ .Lon }})"
+     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.focusShop({{ .ID }}, {{ .Lat }}, {{ .Lon }});}"
+     tabindex="0"
+     role="button"
+     aria-label="Магазин ВкусВилл: {{ .Address }}">
+  
+  <div class="flex items-start justify-between gap-3">
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <svg class="w-3 h-3 text-emerald-600" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+          </svg>
+          {{ if .City }}{{ .City.Name }}{{ else }}ВкусВилл{{ end }}
+        </span>
+        
+        {{ if .DistanceStr }}
+        <span class="inline-flex items-center text-xs font-medium text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-full">
+          {{ .DistanceStr }}
+        </span>
+        {{ end }}
+      </div>
+      
+      <h3 class="mt-1.5 font-semibold text-slate-900 text-sm leading-snug group-hover:text-emerald-700 transition-colors line-clamp-2">
+        {{ .Address }}
+      </h3>
+      
+      {{ if .SubwayNames }}
+      <p class="mt-1 text-xs text-slate-500 flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+        <span class="truncate">{{ .SubwayNames }}</span>
+      </p>
+      {{ end }}
+    </div>
+
+    {{ if gt .Rating 0.0 }}
+    <div class="flex items-center gap-1 bg-amber-50 border border-amber-200/80 px-2 py-1 rounded-lg flex-shrink-0">
+      <svg class="w-3.5 h-3.5 text-amber-500 fill-amber-400" aria-hidden="true" viewBox="0 0 20 20">
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+      </svg>
+      <span class="text-xs font-bold text-amber-900">{{ formatRating .Rating }}</span>
+    </div>
+    {{ end }}
+  </div>
+
+  <div class="mt-2.5 flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+    <div class="flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+      <span class="truncate">{{ .Schedule }}</span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <a href="https://yandex.ru/maps/?rtext=~{{ .Lat }},{{ .Lon }}"
+         target="_blank"
+         rel="noopener noreferrer"
+         onclick="event.stopPropagation()"
+         title="Маршрут в Яндекс.Картах"
+         class="text-slate-400 hover:text-emerald-600 transition-colors p-1"
+         aria-label="Построить маршрут в Яндекс.Картах">
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+        </svg>
+      </a>
+
+      {{ if .URL }}
+      <a href="{{ .URL }}"
+         target="_blank"
+         rel="noopener noreferrer"
+         onclick="event.stopPropagation()"
+         title="Страница магазина на vkusvill.ru"
+         class="text-slate-400 hover:text-emerald-600 transition-colors p-1"
+         aria-label="Страница магазина на ВкусВилл">
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+        </svg>
+      </a>
+      {{ end }}
+    </div>
+  </div>
+
+  {{ if .Features }}
+  <div class="mt-2 flex flex-wrap gap-1">
+    {{ range .Features }}
+    <span class="inline-flex items-center text-[10px] font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+      {{ .Name }}
+    </span>
+    {{ end }}
+  </div>
+  {{ end }}
+</div>
+{{ end }}
