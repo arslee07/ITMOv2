@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Git pre-commit hook: checks formatting, vet, and runs tests
+
+set -e
+
+echo "🔍 [pre-commit] Проверка форматирования кода (gofmt)..."
+UNFORMATTED=$(gofmt -l .)
+if [ -n "$UNFORMATTED" ]; then
+    echo "❌ Ошибка: Следующие файлы не отформатированы:"
+    echo "$UNFORMATTED"
+    echo "💡 Запустите 'gofmt -w .' для автоматического форматирования."
+    exit 1
+fi
+echo "✅ Код отформатирован."
+
+echo "🔍 [pre-commit] Запуск go vet..."
+if ! go vet ./...; then
+    echo "❌ Ошибка: 'go vet' обнаружил проблемы."
+    exit 1
+fi
+echo "✅ go vet пройден."
+
+echo "🔍 [pre-commit] Запуск быстрых тестов (go test)..."
+if ! go test ./...; then
+    echo "❌ Ошибка: Тесты не прошли."
+    exit 1
+fi
+echo "✅ Все тесты успешно пройдены!"
+
+exit 0

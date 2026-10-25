@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ВкусВилл Радар — Карта магазинов сети</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            vkusvill: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#008248', // VkusVill Official Brand Green
+              800: '#006837',
+              900: '#004d28',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet & MarkerCluster -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- HTMX & Alpine.js -->
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body class="h-full flex flex-col bg-slate-100 font-sans text-slate-800 overflow-hidden"
+      x-data="{ mobileTab: 'split' }">
+
+  <!-- Main Navigation Bar -->
+  <header class="h-14 bg-white border-b border-slate-200 px-4 flex items-center justify-between flex-shrink-0 z-30 shadow-xs">
+    <div class="flex items-center gap-3">
+      <!-- VkusVill Logo Icon -->
+      <div class="w-9 h-9 rounded-xl bg-vkusvill-700 flex items-center justify-center text-white font-black text-lg shadow-sm">
+        ВВ
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-slate-900 leading-none flex items-center gap-2">
+          <span>ВкусВилл Радар</span>
+          <span class="text-[10px] font-semibold tracking-wide uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+            MCP API
+          </span>
+        </h1>
+        <p class="text-xs text-slate-400 mt-0.5 hidden sm:block">Интерактивная карта и каталог магазинов</p>
+      </div>
+    </div>
+
+    <!-- Right Header Meta -->
+    <div class="flex items-center gap-3">
+      <div class="hidden md:flex items-center gap-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Сеть: <strong>2 200+</strong> точек</span>
+      </div>
+
+      <!-- Mobile Tab Switcher Buttons (only on small screens) -->
+      <div class="flex md:hidden bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-medium">
+        <button type="button"
+                @click="mobileTab = 'list'"
+                :class="mobileTab === 'list' ? 'bg-white shadow text-slate-900 font-bold' : 'text-slate-600'"
+                class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+          Список
+        </button>
+        <button type="button"
+                @click="mobileTab = 'map'"
+                :class="mobileTab === 'map' ? 'bg-white shadow text-slate-900 font-bold' : 'text-slate-600'"
+                class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+          Карта
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HTMX Loading Indicator Bar -->
+  <div id="loading-bar" class="htmx-indicator h-1 bg-vkusvill-700 w-full animate-pulse z-40"></div>
+
+  <!-- Content Body: Split View -->
+  <main class="flex-1 flex overflow-hidden relative">
+    
+    <!-- Left Column: Filters + Shop Cards (Sidebar) -->
+    <section class="w-full md:w-[440px] lg:w-[480px] bg-white border-r border-slate-200 flex flex-col flex-shrink-0 z-20 transition-all duration-200"
+             :class="{
+               'block': mobileTab === 'list' || mobileTab === 'split',
+               'hidden md:flex': mobileTab === 'map'
+             }">
+      
+      <!-- Filters Component -->
+      {{ template "filters.html" . }}
+
+      <!-- Dynamic HTMX Shops List -->
+      <div id="shops-list" class="flex-1 overflow-hidden">
+        {{ template "shop_list.html" . }}
+      </div>
+    </section>
+
+    <!-- Right Column: Leaflet Map -->
+    <section class="flex-1 h-full relative z-10"
+             :class="{
+               'block': mobileTab === 'map' || mobileTab === 'split',
+               'hidden md:block': mobileTab === 'list'
+             }">
+      
+      <!-- The Map Div -->
+      <div id="map" class="w-full h-full"></div>
+
+      <!-- Floating Map Info Badge -->
+      <div class="absolute top-4 right-4 z-[500] bg-white/90 backdrop-blur-md border border-slate-200/80 shadow-md rounded-xl px-3 py-2 text-xs flex items-center gap-2 pointer-events-auto">
+        <span class="w-2.5 h-2.5 rounded-full bg-vkusvill-700"></span>
+        <span id="markers-count" class="font-medium text-slate-700">Загрузка маркеров...</span>
+      </div>
+
+      <!-- Floating Reset Map View Button -->
+      <button type="button"
+              onclick="window.resetMapView()"
+              class="absolute bottom-6 right-4 z-[500] bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-md rounded-xl px-3 py-2 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer pointer-events-auto"
+              title="Показать все маркеры">
+        <svg class="w-4 h-4 text-vkusvill-700" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+        </svg>
+        <span>Все точки</span>
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Application Logic -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

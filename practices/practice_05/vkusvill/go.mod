@@ -1,0 +1,3 @@
+module vkusvill
+
+go 1.27.1
