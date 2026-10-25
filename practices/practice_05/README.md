@@ -32,4 +32,4 @@ PORT=8099 WARM_MAX_PAGES=1 ./bin/vkusvill
   инструкции OpenSpec.
 - `homework/README.md` — факты прогона и что осталось показать вживую.
 - `homework/comparison.md` — Spec Kit против OpenSpec.
-- `homework/reflection.md` — что согласовали и чему научились.
+- `homework/reflection.md` — каркас: факты и вопросы, ответы пишешь сам.
