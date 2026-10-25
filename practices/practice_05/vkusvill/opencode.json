@@ -24,7 +24,11 @@
     "servers": {
       "vvmcp": {
         "type": "local",
-        "command": ["go", "run", "./cmd/vvmcp"]
+        "command": [
+          "go",
+          "run",
+          "./cmd/vvmcp"
+        ]
       },
       "vkusvill": {
         "type": "remote",

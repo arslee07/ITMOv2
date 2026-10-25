@@ -5,6 +5,10 @@ context: |
   All artifacts must be written in Russian.
   Keep OpenSpec structural headings and SHALL/MUST keywords in English.
 
+rules:
+  design:
+    - Объясни взаимодействие диаграммой Mermaid.
+
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
 # Example:

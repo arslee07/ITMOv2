@@ -6,8 +6,23 @@
       <span class="font-semibold text-slate-800">Магазины</span>
       <span id="shops-count" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">{{ .TotalShops }}</span>
     </div>
-    <div id="shops-progress" class="text-slate-400 font-medium"></div>
+    <div class="flex items-center gap-2">
+      <span id="shops-progress" class="text-slate-400 font-medium"></span>
+      <button type="button"
+              id="export-btn"
+              onclick="window.exportCsv()"
+              disabled
+              aria-label="Экспорт магазинов в CSV"
+              title="Экспорт магазинов в CSV"
+              class="inline-flex items-center justify-center gap-1 min-h-11 min-w-11 px-2.5 py-1 rounded-lg border border-emerald-200 bg-white text-emerald-700 font-semibold hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
+        <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0 0l-4-4m4 4l4-4"/>
+        </svg>
+        <span>CSV</span>
+      </button>
+    </div>
   </div>
+  <div id="export-status" role="status" aria-live="polite" class="hidden px-4 py-2 text-xs border-b border-slate-200"></div>
 
   <!-- Cards Scroll Area (filled incrementally by app.js) -->
   <div class="flex-1 overflow-y-auto p-4 space-y-3" id="shops-cards">

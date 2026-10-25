@@ -79,6 +79,7 @@ func run() error {
 	mux.HandleFunc("GET /{$}", handler.HandleIndex)
 	mux.HandleFunc("GET /shops", handler.HandleShops)
 	mux.HandleFunc("GET /api/shops/points", handler.HandleShopsPoints)
+	mux.HandleFunc("GET /api/export.csv", handler.HandleExportCSV)
 
 	// 5. Setup HTTP Server with timeouts
 	server := &http.Server{

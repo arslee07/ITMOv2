@@ -323,6 +323,8 @@
     const countEl = document.getElementById('shops-count');
     if (countEl) countEl.textContent = String(total);
 
+    updateExportAvailability(total);
+
     const progressEl = document.getElementById('shops-progress');
     if (!progressEl) return;
     if (total > shown) {
@@ -471,6 +473,97 @@
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
+  };
+
+  // -------------------------------------------------------------- Export ---
+
+  function showExportStatus(message, isError) {
+    const status = document.getElementById('export-status');
+    if (!status) return;
+
+    status.textContent = message;
+    status.classList.toggle('hidden', !message);
+    status.classList.toggle('text-rose-600', Boolean(isError));
+    status.classList.toggle('bg-rose-50', Boolean(isError));
+    status.classList.toggle('text-emerald-700', !isError && Boolean(message));
+    status.classList.toggle('bg-emerald-50', !isError && Boolean(message));
+  }
+
+  function updateExportAvailability(total) {
+    const btn = document.getElementById('export-btn');
+    if (!btn) return;
+    if (btn.dataset.busy === 'true') return;
+    btn.disabled = !(total > 0);
+  }
+
+  function exportParams(filters) {
+    const params = new URLSearchParams();
+    if (filters.city) params.set('city_id', String(filters.city));
+    if (filters.feature) params.set('feature_id', String(filters.feature));
+    if (filters.q) params.set('q', filters.q);
+    if (filters.hasCoords) {
+      params.set('lat', String(filters.lat));
+      params.set('lon', String(filters.lon));
+    }
+    return params;
+  }
+
+  function localStamp(date) {
+    const pad = (value) => String(value).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}`;
+  }
+
+  function exportFilename(response) {
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const match = /filename="([^"]+)"/.exec(disposition);
+    if (match) return match[1];
+
+    return `vkusvill-shops-${localStamp(new Date())}.csv`;
+  }
+
+  window.exportCsv = async function () {
+    const btn = document.getElementById('export-btn');
+    if (!btn || btn.disabled || btn.dataset.busy === 'true') return;
+    if (!document.getElementById('export-status')) return;
+
+    const filters = currentFilters();
+    const query = exportParams(filters).toString();
+
+    btn.dataset.busy = 'true';
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    btn.classList.add('animate-pulse');
+    showExportStatus('Готовим файл…', false);
+
+    try {
+      const response = await fetch(`/api/export.csv${query ? `?${query}` : ''}`);
+      if (!response.ok) {
+        const text = (await response.text()).trim();
+        showExportStatus(text || 'Не удалось выгрузить файл', true);
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = exportFilename(response);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      // Firefox and Safari may cancel the download if the URL is revoked
+      // synchronously after click().
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      showExportStatus('Файл готов', false);
+    } catch (err) {
+      showExportStatus('Не удалось выгрузить файл', true);
+    } finally {
+      btn.dataset.busy = 'false';
+      btn.removeAttribute('aria-busy');
+      btn.classList.remove('animate-pulse');
+      updateExportAvailability(arrangedShops(currentFilters()).length);
+    }
   };
 
   // -------------------------------------------------------- Network sync ----
