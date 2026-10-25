@@ -1,0 +1,232 @@
+{
+  "target": "http://127.0.0.1:8066",
+  "total": 25,
+  "vulnerable": 0,
+  "checks": [
+    {
+      "id": "SQLI-PROFILE",
+      "title": "SQL injection in /profile id",
+      "severity": "critical",
+      "request": "GET /profile?id=1%20OR%201%3D1",
+      "vulnerable": false,
+      "evidence": "400 {\"error\": \"invalid id\"}",
+      "note": ""
+    },
+    {
+      "id": "SQLI-PROFILE-UNION",
+      "title": "UNION injection dumps all profiles",
+      "severity": "critical",
+      "request": "GET /profile?id=-1%20UNION%20SELECT%201%2Cname%2Cemail%2Caddress%20FROM%20profiles",
+      "vulnerable": false,
+      "evidence": "400 {\"error\": \"invalid id\"}",
+      "note": ""
+    },
+    {
+      "id": "SQLI-SEARCH",
+      "title": "SQL injection in /search q",
+      "severity": "critical",
+      "request": "GET /search?q=%27%20OR%201%3D1%20--",
+      "vulnerable": false,
+      "evidence": "200 []",
+      "note": ""
+    },
+    {
+      "id": "SQLI-CONTEXT",
+      "title": "SQL injection in /assistant/context order_id",
+      "severity": "critical",
+      "request": "GET /assistant/context?order_id=-1%20UNION%20SELECT%201%2Cname%2Cemail%2Caddress%20FROM%20profiles",
+      "vulnerable": false,
+      "evidence": "400 {\"error\": \"invalid order\"}",
+      "note": ""
+    },
+    {
+      "id": "ROLE-SPOOF",
+      "title": "X-Role header grants staff export",
+      "severity": "critical",
+      "request": "GET /admin/export with X-Role: staff, no token",
+      "vulnerable": false,
+      "evidence": "401 {\"error\": \"login required\"}",
+      "note": ""
+    },
+    {
+      "id": "IDOR-PROFILE",
+      "title": "alice reads bob profile",
+      "severity": "high",
+      "request": "GET /profile?id=2 as alice",
+      "vulnerable": false,
+      "evidence": "403 {\"error\": \"forbidden\"}",
+      "note": ""
+    },
+    {
+      "id": "IDOR-ORDERS",
+      "title": "unauthenticated listing of all orders",
+      "severity": "high",
+      "request": "GET /orders without token",
+      "vulnerable": false,
+      "evidence": "401 {\"error\": \"login required\"}",
+      "note": ""
+    },
+    {
+      "id": "IDOR-SEARCH",
+      "title": "alice enumerates all profiles via /search",
+      "severity": "critical",
+      "request": "GET /search?q=TEST as alice",
+      "vulnerable": false,
+      "evidence": "200 [{\"id\": 1, \"name\": \"TEST_ALICE\", \"email\": \"alice@example.invalid\", \"address\": \"TEST_ADDRESS_A\"}]",
+      "note": ""
+    },
+    {
+      "id": "IDOR-CONTEXT",
+      "title": "alice reads bob order through assistant context",
+      "severity": "high",
+      "request": "GET /assistant/context?order_id=2 as alice",
+      "vulnerable": false,
+      "evidence": "403 {\"error\": \"forbidden\"}",
+      "note": ""
+    },
+    {
+      "id": "FILES-CROSS-USER",
+      "title": "alice reads bob receipt",
+      "severity": "high",
+      "request": "GET /files?user=bob&path=receipt.txt as alice",
+      "vulnerable": false,
+      "evidence": "403 {\"error\": \"forbidden\"}",
+      "note": ""
+    },
+    {
+      "id": "FILES-PRIVATE",
+      "title": "read of private/operator-note.txt",
+      "severity": "critical",
+      "request": "GET /files?user=../private&path=operator-note.txt",
+      "vulnerable": false,
+      "evidence": "403 {\"error\": \"forbidden\"}",
+      "note": ""
+    },
+    {
+      "id": "PRICE-TAMPER",
+      "title": "client controls order price",
+      "severity": "high",
+      "request": "POST /orders {\"product\":\"chair\",\"price\":1}",
+      "vulnerable": false,
+      "evidence": "201 {\"id\": 5, \"owner\": 1, \"product\": \"chair\", \"price\": 5000}",
+      "note": ""
+    },
+    {
+      "id": "PRICE-NEGATIVE",
+      "title": "negative order price accepted",
+      "severity": "medium",
+      "request": "POST /orders {\"product\":\"chair\",\"price\":-5000}",
+      "vulnerable": false,
+      "evidence": "201 {\"id\": 6, \"owner\": 1, \"product\": \"chair\", \"price\": 5000}",
+      "note": ""
+    },
+    {
+      "id": "LOGS-UNAUTH",
+      "title": "unauthenticated debug log dump",
+      "severity": "high",
+      "request": "GET /debug/logs without token",
+      "vulnerable": false,
+      "evidence": "401 {\"error\": \"login required\"}",
+      "note": ""
+    },
+    {
+      "id": "LOGS-TOKEN-LEAK",
+      "title": "session tokens exposed in logs",
+      "severity": "critical",
+      "request": "GET /debug/logs after a login",
+      "vulnerable": false,
+      "evidence": "401 token_present=False",
+      "note": ""
+    },
+    {
+      "id": "LOGS-PASSWORD-LEAK",
+      "title": "plaintext passwords exposed in logs",
+      "severity": "critical",
+      "request": "GET /debug/logs after a login",
+      "vulnerable": false,
+      "evidence": "401 password_present=False",
+      "note": ""
+    },
+    {
+      "id": "REVIEW-UNAUTH",
+      "title": "anonymous review submission",
+      "severity": "medium",
+      "request": "POST /reviews without token",
+      "vulnerable": false,
+      "evidence": "401 {\"error\": \"login required\"}",
+      "note": ""
+    },
+    {
+      "id": "PROMPT-INJECTION",
+      "title": "injected review reaches assistant context",
+      "severity": "critical",
+      "request": "GET /assistant/context after malicious review",
+      "vulnerable": false,
+      "evidence": "200 injection_present=False",
+      "note": ""
+    },
+    {
+      "id": "STORED-XSS",
+      "title": "review text rendered as raw HTML",
+      "severity": "high",
+      "request": "POST /reviews then GET /reviews/view",
+      "vulnerable": false,
+      "evidence": "401/200 raw_script_present=False",
+      "note": ""
+    },
+    {
+      "id": "ASSISTANT-EXPORT",
+      "title": "unauthenticated export_profiles via executor",
+      "severity": "critical",
+      "request": "POST /assistant/execute export_profiles without token",
+      "vulnerable": false,
+      "evidence": "401 {\"error\": \"login required\"}",
+      "note": ""
+    },
+    {
+      "id": "ASSISTANT-PRIVATE-FILE",
+      "title": "executor reads private note",
+      "severity": "critical",
+      "request": "POST /assistant/execute read_file private/operator-note.txt",
+      "vulnerable": false,
+      "evidence": "401 {\"error\": \"login required\"}",
+      "note": ""
+    },
+    {
+      "id": "ASSISTANT-CROSS-USER",
+      "title": "executor reads another user's receipt",
+      "severity": "high",
+      "request": "POST /assistant/execute read_file files/bob/receipt.txt",
+      "vulnerable": false,
+      "evidence": "401 {\"error\": \"login required\"}",
+      "note": ""
+    },
+    {
+      "id": "VERBOSE-ERROR",
+      "title": "internal exception details leaked",
+      "severity": "medium",
+      "request": "GET /profile?id='",
+      "vulnerable": false,
+      "evidence": "400 {\"error\": \"invalid id\"}",
+      "note": ""
+    },
+    {
+      "id": "NO-RATE-LIMIT",
+      "title": "login brute force is not throttled",
+      "severity": "medium",
+      "request": "8 failed logins for unknown user",
+      "vulnerable": false,
+      "evidence": "statuses=[401, 401, 401, 401, 401, 429, 429, 429]",
+      "note": ""
+    },
+    {
+      "id": "ASSISTANT-DELETE",
+      "title": "unauthenticated delete_tree destroys files",
+      "severity": "critical",
+      "request": "POST /assistant/execute delete_tree files/bob",
+      "vulnerable": false,
+      "evidence": "401 {\"error\": \"login required\"}",
+      "note": ""
+    }
+  ]
+}

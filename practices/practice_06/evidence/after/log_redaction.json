@@ -1,0 +1,12 @@
+{
+  "checks": {
+    "anonymous_is_denied": true,
+    "customer_is_denied": true,
+    "staff_is_allowed": true,
+    "alice_token_is_redacted": true,
+    "bob_password_is_redacted": true,
+    "staff_token_is_redacted": true,
+    "redaction_marker_present": true
+  },
+  "failed": []
+}

