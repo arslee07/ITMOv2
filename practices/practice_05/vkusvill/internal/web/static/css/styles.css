@@ -1,0 +1,123 @@
+/* VkusVill Radar Custom Styles */
+
+/* HTMX Loading Indicator */
+.htmx-indicator {
+  display: none;
+}
+.htmx-request.htmx-indicator,
+.htmx-request .htmx-indicator {
+  display: block;
+}
+
+/* Custom Scrollbars */
+#shops-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+#shops-scroll-area::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+#shops-scroll-area::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+#shops-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Card active state when marker is selected */
+.shop-card.is-selected {
+  border-color: #008248 !important;
+  box-shadow: 0 0 0 2px rgba(0, 130, 72, 0.25), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background-color: #f0fdf4;
+}
+
+/* Leaflet Custom Marker & Clusters */
+.vv-map-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background-color: #008248;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 4px 10px rgba(0, 130, 72, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.vv-map-pin-inner {
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 11px;
+}
+.vv-map-pin:hover {
+  transform: rotate(-45deg) scale(1.15);
+  background-color: #006837;
+  z-index: 1000 !important;
+}
+
+/* User Geolocation Pulse Marker */
+.user-location-marker {
+  width: 16px;
+  height: 16px;
+  background: #2563eb;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+  animation: pulse-ring 2s infinite;
+}
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(37, 99, 235, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
+}
+
+/* Custom MarkerCluster Styling matching VkusVill brand */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-color: rgba(0, 130, 72, 0.2) !important;
+}
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+  background-color: #008248 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-family: inherit !important;
+}
+
+/* Leaflet Popup Styling */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid #e2e8f0;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+.leaflet-popup-tip {
+  background: white !important;
+}
