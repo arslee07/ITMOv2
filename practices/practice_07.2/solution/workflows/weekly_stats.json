@@ -1,0 +1,544 @@
+{
+  "name": "hw7.2_weekly",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * MON"
+            }
+          ]
+        }
+      },
+      "id": "0155176c-5c83-4cd9-8a1f-b099654da256",
+      "name": "Every Monday 9:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        2656,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/arslee07/sample-python-project/issues?state=all&since=={{ $now.minus({ days: 7 }).startOf('day').toISO() }}&per_page=100",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d1d3d4a-a9b9-4ad9-b18c-2767088b300a",
+      "name": "Issues created",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2912,
+        -80
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/arslee07/sample-python-project/issues?state=closed&since=={{ $now.minus({ days: 7 }).startOf('day').toISO() }}&per_page=100",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5bc0a580-3806-4ff1-a07a-457581a6227e",
+      "name": "Issues closed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3168,
+        -80
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/arslee07/sample-python-project/pulls?state=all&sort=created&direction=desc&per_page=100",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "507f3daa-2c30-4bfa-83ed-40fb83999034",
+      "name": "PRs opened",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3424,
+        -80
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/arslee07/sample-python-project/pulls?state=closed&sort=updated&direction=desc&per_page=100",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d605f09d-9969-4586-8ca8-b15caaff6cad",
+      "name": "PRs merged",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3696,
+        -80
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Собираем статистику за последние 7 дней\nconst startMs = $now.minus({ days: 7 }).startOf('day').toMillis();\nconst endMs = $now.toMillis();\n\nconst within = (iso) => {\n  if (!iso) return false;\n  const t = new Date(iso).getTime();\n  return Number.isFinite(t) && t >= startMs && t <= endMs;\n};\n\nconst uniq = (items) => {\n  const seen = new Set();\n  return items.filter((x) => {\n    if (seen.has(x.id)) return false;\n    seen.add(x.id);\n    return true;\n  });\n};\n\nconst issuesAll = uniq($('Issues created').all().map((i) => i.json)).filter((x) => !x.pull_request);\nconst issuesCreated = issuesAll.filter((x) => within(x.created_at));\nconst issuesClosed = uniq($('Issues closed').all().map((i) => i.json))\n  .filter((x) => !x.pull_request && within(x.closed_at));\n\nconst prsOpened = uniq($('PRs opened').all().map((i) => i.json)).filter((x) => within(x.created_at));\nconst prsMerged = uniq($('PRs merged').all().map((i) => i.json)).filter((x) => within(x.merged_at));\n\nconst typeOf = (issue) => {\n  const labels = (issue.labels || []).map((l) => (typeof l === 'string' ? l : l.name));\n  if (labels.includes('bug')) return 'bug';\n  if (labels.includes('feature-request')) return 'feature';\n  if (labels.includes('task')) return 'task';\n  return 'other';\n};\n\nconst byType = { bug: 0, feature: 0, task: 0, other: 0 };\nfor (const issue of issuesCreated) byType[typeOf(issue)]++;\n\nconst authors = {};\nconst bump = (login) => { authors[login] = (authors[login] || 0) + 1; };\nfor (const x of issuesCreated) bump(x.user?.login || 'unknown');\nfor (const x of prsOpened) bump(x.user?.login || 'unknown');\n\nconst byAuthor = Object.entries(authors)\n  .sort((a, b) => b[1] - a[1])\n  .map(([login, count]) => ({ login, count }));\n\nreturn [{\n  json: {\n    week_start: $now.minus({ days: 7 }).startOf('day').toISO(),\n    week_end: $now.toISO(),\n    issues_opened: issuesCreated.length,\n    issues_closed: issuesClosed.length,\n    prs_opened: prsOpened.length,\n    prs_merged: prsMerged.length,\n    by_type: byType,\n    by_author: byAuthor,\n  },\n}];"
+      },
+      "id": "2ffd1e0e-087f-45ea-b0ff-40c578e78634",
+      "name": "Group stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3952,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "weekly_stats"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "week_start",
+              "condition": "lt",
+              "keyValue": "={{ $('Group stats').first().json.week_start }}"
+            }
+          ]
+        },
+        "limit": 1,
+        "orderBy": true,
+        "orderByColumn": "week_start"
+      },
+      "id": "60dc0e19-a550-4874-90c8-412da7585116",
+      "name": "Get previous week",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4208,
+        -80
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Считаем Δ к прошлой неделе\nconst cur = $('Group stats').first().json;\nconst prevRaw = $('Get previous week').first().json || {};\nconst hasPrev = typeof prevRaw.week_start === 'string' && prevRaw.week_start.length > 0;\n\nconst num = (v) => (typeof v === 'number' ? v : Number(v) || 0);\nconst diff = (key) => (hasPrev ? num(cur[key]) - num(prevRaw[key]) : null);\nconst fmt = (v) => (v === null ? '—' : (v > 0 ? `+${v}` : `${v}`));\n\nconst delta = {\n  issues_opened: diff('issues_opened'),\n  issues_closed: diff('issues_closed'),\n  prs_opened: diff('prs_opened'),\n  prs_merged: diff('prs_merged'),\n};\n\nconst prevText = hasPrev\n  ? `Прошлая неделя: issues +${prevRaw.issues_opened}, closed ${prevRaw.issues_closed}, PR +${prevRaw.prs_opened}, merged ${prevRaw.prs_merged}.`\n  : 'Прошлой недели в таблице нет — это первая запись, Δ считать не с чем.';\n\nconst llm_prompt = `Ты аналитик Open Source проекта. Напиши 2-3 предложения о том, что изменилось за неделю, опираясь только на эти цифры.\n\nТекущая неделя: issues создано ${cur.issues_opened}, закрыто ${cur.issues_closed}, PR открыто ${cur.prs_opened}, смержено ${cur.prs_merged}.\nПо типам: bug ${cur.by_type.bug}, feature ${cur.by_type.feature}, task ${cur.by_type.task}, other ${cur.by_type.other}.\n${prevText}\nΔ issues: ${fmt(delta.issues_opened)}, Δ closed: ${fmt(delta.issues_closed)}, Δ PR: ${fmt(delta.prs_opened)}, Δ merged: ${fmt(delta.prs_merged)}.\n\nБез вступлений и списков, только вывод.`;\n\nreturn [{ json: { ...cur, has_prev: hasPrev, prev: hasPrev ? prevRaw : null, delta, prev_text: prevText, llm_prompt } }];"
+      },
+      "id": "2b38a993-f536-4cb6-b2ff-0097891cdf43",
+      "name": "Compute delta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4464,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.llm_prompt }}",
+        "batching": {
+          "batchSize": 1,
+          "delayBetweenBatches": 0
+        }
+      },
+      "id": "b1288846-c13a-4b69-b09d-1dc09f8990c0",
+      "name": "AI annotation",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        4736,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-5.2"
+        },
+        "options": {}
+      },
+      "id": "52b2b380-fb7d-4949-9d4f-b85712e65e6d",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4736,
+        144
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "lYn5kjnDxHyOLnEF",
+          "name": "vsellm"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Итоговое HTML-письмо с Δ и AI-комментарием\nconst s = $('Compute delta').first().json;\nconst aiRaw = $('AI annotation').first().json;\nconst ai = String(aiRaw.text ?? aiRaw.output ?? '').trim();\n\nconst esc = (v) => String(v).replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\nconst fmt = (v) => (v === null ? '—' : (v > 0 ? `+${v}` : `${v}`));\n\nconst row = (k, v, d) => `<tr><td>${esc(k)}</td><td align=\"right\"><b>${esc(v)}</b></td><td align=\"right\">${esc(fmt(d))}</td></tr>`;\nconst row2 = (k, v) => `<tr><td>${esc(k)}</td><td align=\"right\"><b>${esc(v)}</b></td></tr>`;\n\nconst html = `\n<h2>Статистика за неделю</h2>\n<p>${esc($now.minus({ days: 7 }).startOf('day').toFormat('yyyy-LL-dd'))} — ${esc($now.toFormat('yyyy-LL-dd'))}</p>\n${ai ? `<blockquote><b>AI-комментарий недели:</b><br>${esc(ai).replace(/\\n/g, '<br>')}</blockquote>` : ''}\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\">\n  <tr><th align=\"left\">Метрика</th><th>Значение</th><th>Δ к прошлой</th></tr>\n  ${row('Issues создано', s.issues_opened, s.delta.issues_opened)}\n  ${row('Issues закрыто', s.issues_closed, s.delta.issues_closed)}\n  ${row('PR открыто', s.prs_opened, s.delta.prs_opened)}\n  ${row('PR смержено', s.prs_merged, s.delta.prs_merged)}\n</table>\n<h3>По типам</h3>\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\">\n  ${row2('bug', s.by_type.bug)}\n  ${row2('feature', s.by_type.feature)}\n  ${row2('task', s.by_type.task)}\n  ${row2('other', s.by_type.other)}\n</table>\n<h3>По авторам</h3>\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\">\n  ${s.by_author.map((a) => row2(a.login, a.count)).join('') || '<tr><td colspan=\"2\">нет активности</td></tr>'}\n</table>\n${s.has_prev ? `<p><small>${esc(s.prev_text)}</small></p>` : `<p><small>${esc(s.prev_text)}</small></p>`}\n`;\n\nreturn [{ json: { html } }];"
+      },
+      "id": "9030f3d8-852a-4709-b713-f7e5bb9a4625",
+      "name": "Build email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4992,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "weekly_stats"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "week_start",
+              "keyValue": "={{ $('Compute delta').first().json.week_start }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "week_start": "={{ $('Compute delta').first().json.week_start }}",
+            "issues_opened": "={{ $('Compute delta').first().json.issues_opened }}",
+            "issues_closed": "={{ $('Compute delta').first().json.issues_closed }}",
+            "prs_opened": "={{ $('Compute delta').first().json.prs_opened }}",
+            "prs_merged": "={{ $('Compute delta').first().json.prs_merged }}",
+            "by_type": "={{ JSON.stringify($('Compute delta').first().json.by_type) }}",
+            "by_author": "={{ JSON.stringify($('Compute delta').first().json.by_author) }}"
+          },
+          "schema": [
+            {
+              "id": "week_start",
+              "displayName": "week_start",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "issues_opened",
+              "displayName": "issues_opened",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "issues_closed",
+              "displayName": "issues_closed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "prs_opened",
+              "displayName": "prs_opened",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "prs_merged",
+              "displayName": "prs_merged",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "by_type",
+              "displayName": "by_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "by_author",
+              "displayName": "by_author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7fbbf21d-3bf5-451e-9795-fbc764583656",
+      "name": "Save weekly stats",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5248,
+        -80
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "sendTo": "arslee07@gmail.com",
+        "subject": "=Weekly stats {{ $now.toFormat('yyyy-LL-dd') }}",
+        "message": "={{ $('Build email').first().json.html }}",
+        "options": {}
+      },
+      "id": "2a4a5bac-9063-426d-83c6-61f7e2090b75",
+      "name": "Send weekly email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        5504,
+        -80
+      ],
+      "webhookId": "093b7e2b-5fdf-4076-b97a-baafe936a384",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "mJw6W7wVfw2hU2L5",
+          "name": "n8n-avito"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every Monday 9:00": {
+      "main": [
+        [
+          {
+            "node": "Issues created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Issues created": {
+      "main": [
+        [
+          {
+            "node": "Issues closed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Issues closed": {
+      "main": [
+        [
+          {
+            "node": "PRs opened",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PRs opened": {
+      "main": [
+        [
+          {
+            "node": "PRs merged",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PRs merged": {
+      "main": [
+        [
+          {
+            "node": "Group stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group stats": {
+      "main": [
+        [
+          {
+            "node": "Get previous week",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get previous week": {
+      "main": [
+        [
+          {
+            "node": "Compute delta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute delta": {
+      "main": [
+        [
+          {
+            "node": "AI annotation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI annotation": {
+      "main": [
+        [
+          {
+            "node": "Build email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build email": {
+      "main": [
+        [
+          {
+            "node": "Save weekly stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save weekly stats": {
+      "main": [
+        [
+          {
+            "node": "Send weekly email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI annotation",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8b954b58-b3a1-4a1e-a0bd-92a106bef6a1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "68dbbb4e8fa686c3fd4e9982ade6836edb66976f207553e7ac22df961581c78c"
+  },
+  "nodeGroups": [],
+  "id": "9s4ZPj4htbBIIYaW",
+  "tags": []
+}
