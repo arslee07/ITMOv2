@@ -1,0 +1,629 @@
+{
+  "name": "hw7.2_issues",
+  "nodes": [
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "arslee07",
+          "mode": "list",
+          "cachedResultName": "arslee07",
+          "cachedResultUrl": "https://github.com/arslee07"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "sample-python-project",
+          "mode": "list",
+          "cachedResultName": "sample-python-project",
+          "cachedResultUrl": "https://github.com/arslee07/sample-python-project"
+        },
+        "events": [
+          "issues"
+        ],
+        "options": {}
+      },
+      "id": "de0b6b2e-8f42-41e7-88ab-10758bd51167",
+      "name": "GitHub Trigger",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        128
+      ],
+      "webhookId": "f62022cc-d03c-4266-95b4-d71e24e11890",
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7df2a08d-fd45-4b6f-b0d7-a9645ce73492",
+              "leftValue": "={{ $json.body.action === 'opened' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5d7d78d6-5e71-467d-8a28-dc05ae103834",
+      "name": "Is opened?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -416,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1fef53dc-dbdd-4dfd-b8a8-8907745a053f",
+              "name": "title",
+              "value": "={{ $json.body.issue.title }}",
+              "type": "string"
+            },
+            {
+              "id": "53b7b2cc-551d-490e-89ab-50ac9552d0c6",
+              "name": "body",
+              "value": "={{ $json.body.issue.body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c6aa7cd0-251b-48a8-a0f4-d2c432dda45a",
+      "name": "Build classifier input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "I7zNnZVqW4eULtm3",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/I7zNnZVqW4eULtm3",
+          "cachedResultName": "hw7.2_classifier"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "ab467160-b45e-43e0-b830-001048a059b2",
+      "name": "Run classifier",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        112,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2f3a8292-4fba-4e82-a814-7de9dddaebec",
+                    "leftValue": "={{ $json.output.type === 'bug' && $json.output.confidence >= 0.8 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "bug"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1e55fd49-02c3-4de4-a3e4-be1f4c3c90fb",
+                    "leftValue": "={{ $json.output.type === 'task' && $json.output.confidence >= 0.8 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "task"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "9f61a021-8258-4330-bb70-2e65d697fc2f",
+                    "leftValue": "={{ $json.output.type === 'feature' && $json.output.confidence >= 0.8 }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "feature"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "needs-triage"
+        }
+      },
+      "id": "667848d8-f5e2-4040-a4a3-c583da459e1d",
+      "name": "Route by type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        368,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "arslee07",
+          "mode": "list",
+          "cachedResultName": "arslee07",
+          "cachedResultUrl": "https://github.com/arslee07"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "sample-python-project",
+          "mode": "list",
+          "cachedResultName": "sample-python-project",
+          "cachedResultUrl": "https://github.com/arslee07/sample-python-project"
+        },
+        "issueNumber": "={{ $('GitHub Trigger').first().json.body.issue.number }}",
+        "editFields": {
+          "labels": [
+            {
+              "label": "bug"
+            }
+          ]
+        }
+      },
+      "id": "3ee65467-fa8f-436b-ab0e-e8d7f14862c1",
+      "name": "Label bug",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        -112
+      ],
+      "webhookId": "a3535dc8-8faa-4edc-a3cc-6cde4a481d28",
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createComment",
+        "owner": {
+          "__rl": true,
+          "value": "arslee07",
+          "mode": "list",
+          "cachedResultName": "arslee07",
+          "cachedResultUrl": "https://github.com/arslee07"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "sample-python-project",
+          "mode": "list",
+          "cachedResultName": "sample-python-project",
+          "cachedResultUrl": "https://github.com/arslee07/sample-python-project"
+        },
+        "issueNumber": "={{ $('GitHub Trigger').first().json.body.issue.number }}",
+        "body": "=Спасибо за репорт! Похоже на баг, повесили лейбл `bug`. Если в описании нет версии, ОС и шагов воспроизведения — добавьте, пожалуйста."
+      },
+      "id": "10fbf723-b7d9-4cf5-b096-5fa0965771e0",
+      "name": "Comment bug",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        -112
+      ],
+      "webhookId": "b78f4210-4beb-4796-a79c-a1101b657615",
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "arslee07",
+          "mode": "list",
+          "cachedResultName": "arslee07",
+          "cachedResultUrl": "https://github.com/arslee07"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "sample-python-project",
+          "mode": "list",
+          "cachedResultName": "sample-python-project",
+          "cachedResultUrl": "https://github.com/arslee07/sample-python-project"
+        },
+        "issueNumber": "={{ $('GitHub Trigger').first().json.body.issue.number }}",
+        "editFields": {
+          "labels": [
+            {
+              "label": "task"
+            }
+          ]
+        }
+      },
+      "id": "eb70f862-4986-4d00-92ce-89a722e19367",
+      "name": "Label task",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        96
+      ],
+      "webhookId": "6949ed39-d39a-47ad-9917-e5a620ab2ed6",
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createComment",
+        "owner": {
+          "__rl": true,
+          "value": "arslee07",
+          "mode": "list",
+          "cachedResultName": "arslee07",
+          "cachedResultUrl": "https://github.com/arslee07"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "sample-python-project",
+          "mode": "list",
+          "cachedResultName": "sample-python-project",
+          "cachedResultUrl": "https://github.com/arslee07/sample-python-project"
+        },
+        "issueNumber": "={{ $('GitHub Trigger').first().json.body.issue.number }}",
+        "body": "=Похоже на задачу/вопрос, повесили лейбл `task`. Уточните, пожалуйста, детали, если чего-то не хватает."
+      },
+      "id": "075e5a9d-02c4-4370-9182-54f93031c3d5",
+      "name": "Comment task",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        96
+      ],
+      "webhookId": "90314bc5-bb68-4696-98a0-5e007557a776",
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "arslee07",
+          "mode": "list",
+          "cachedResultName": "arslee07",
+          "cachedResultUrl": "https://github.com/arslee07"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "sample-python-project",
+          "mode": "list",
+          "cachedResultName": "sample-python-project",
+          "cachedResultUrl": "https://github.com/arslee07/sample-python-project"
+        },
+        "issueNumber": "={{ $('GitHub Trigger').first().json.body.issue.number }}",
+        "editFields": {
+          "labels": [
+            {
+              "label": "feature-request"
+            }
+          ]
+        }
+      },
+      "id": "9711a955-76f0-4bab-9e17-5b1bfc8b9457",
+      "name": "Label feature",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        288
+      ],
+      "webhookId": "356fe3a1-09dd-48ca-9e55-5a1510a0d9f7",
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createComment",
+        "owner": {
+          "__rl": true,
+          "value": "arslee07",
+          "mode": "list",
+          "cachedResultName": "arslee07",
+          "cachedResultUrl": "https://github.com/arslee07"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "sample-python-project",
+          "mode": "list",
+          "cachedResultName": "sample-python-project",
+          "cachedResultUrl": "https://github.com/arslee07/sample-python-project"
+        },
+        "issueNumber": "={{ $('GitHub Trigger').first().json.body.issue.number }}",
+        "body": "=Спасибо за идею! Повесили лейбл `feature-request`. Опишите, пожалуйста, сценарий использования — так её проще приоритизировать."
+      },
+      "id": "2e91de0a-f838-4656-a367-d72fa4cd71a7",
+      "name": "Comment feature",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        288
+      ],
+      "webhookId": "1882a3fc-f759-452b-bd60-f56a5b2e1ec7",
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "arslee07",
+          "mode": "list",
+          "cachedResultName": "arslee07",
+          "cachedResultUrl": "https://github.com/arslee07"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "sample-python-project",
+          "mode": "list",
+          "cachedResultName": "sample-python-project",
+          "cachedResultUrl": "https://github.com/arslee07/sample-python-project"
+        },
+        "issueNumber": "={{ $('GitHub Trigger').first().json.body.issue.number }}",
+        "editFields": {
+          "labels": [
+            {
+              "label": "needs-triage"
+            }
+          ]
+        }
+      },
+      "id": "0b914763-e9f4-4a9d-9074-a58bc3f60ac9",
+      "name": "Label needs-triage",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        496
+      ],
+      "webhookId": "8654c1e6-9f22-4100-9e5b-2f1c532b1c39",
+      "credentials": {
+        "githubApi": {
+          "id": "ttJnoedeAl3TVv5f",
+          "name": "arslee07"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "GitHub Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is opened?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is opened?": {
+      "main": [
+        [
+          {
+            "node": "Build classifier input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build classifier input": {
+      "main": [
+        [
+          {
+            "node": "Run classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run classifier": {
+      "main": [
+        [
+          {
+            "node": "Route by type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by type": {
+      "main": [
+        [
+          {
+            "node": "Label bug",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label feature",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label needs-triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label bug": {
+      "main": [
+        [
+          {
+            "node": "Comment bug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label task": {
+      "main": [
+        [
+          {
+            "node": "Comment task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label feature": {
+      "main": [
+        [
+          {
+            "node": "Comment feature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e055b365-0503-42c2-9b7b-bfbca104ab17",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "68dbbb4e8fa686c3fd4e9982ade6836edb66976f207553e7ac22df961581c78c"
+  },
+  "nodeGroups": [],
+  "id": "1nFWKyZ6wEhxPZPM",
+  "tags": []
+}
