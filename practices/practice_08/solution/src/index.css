@@ -1,0 +1,122 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans:
+    'Inter', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-mono:
+    'IBM Plex Mono', 'SFMono-Regular', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-border: var(--success-border);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-border: var(--danger-border);
+
+  --color-bug: var(--bug);
+  --color-bug-soft: var(--bug-soft);
+  --color-feature: var(--feature);
+  --color-feature-soft: var(--feature-soft);
+  --color-task: var(--task);
+  --color-task-soft: var(--task-soft);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  --background: #f7f6f3;
+  --foreground: #1c1b19;
+
+  --card: #ffffff;
+  --card-foreground: #1c1b19;
+
+  --popover: #ffffff;
+  --popover-foreground: #1c1b19;
+
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+
+  --secondary: #eeece7;
+  --secondary-foreground: #514d46;
+
+  --muted: #f1efe9;
+  --muted-foreground: #77736b;
+
+  --accent: #f5f4f1;
+  --accent-foreground: #1c1b19;
+
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+
+  --border: #e5e2db;
+  --input: #e5e2db;
+  --ring: #4f46e5;
+
+  --success: #25613b;
+  --success-soft: #f1faf4;
+  --success-border: #b8dec5;
+
+  --danger-soft: #fff6f4;
+  --danger-border: #f0c3bd;
+
+  --bug: #a64034;
+  --bug-soft: #fcebe8;
+  --feature: #5146a5;
+  --feature-soft: #eeecff;
+  --task: #686354;
+  --task-soft: #f1efe9;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: #dedbff;
+  }
+}
+
+@layer utilities {
+  .mono-label {
+    @apply font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground;
+  }
+}
